@@ -1,22 +1,20 @@
-import {FileSystemHandler} from "fileSystem"
 import fs from "fs";
-import {CommandHandler} from "handlers/CommandHandler";
-import {KLLog, KLLogManager} from "kaffelogic"
 import {Align, getMarkdownTable, Row} from 'markdown-table-ts';
+import path from "path";
+import walkSync from "walk-sync";
 import {
   App,
-  Editor,
   FuzzySuggestModal,
-  MarkdownView,
-  Modal,
   Notice,
   Plugin,
   PluginSettingTab,
   Setting,
-  TFile,
+  TFile
 } from "obsidian";
-import path from "path";
-import walkSync from "walk-sync";
+
+import {IKLLog, KLLog} from "kaffelogic";
+import {CommandHandler} from "./handlers/CommandHandler";
+import {FileSystemHandler} from "./fileSystem";
 
 interface KaffelogicPluginSettings {
   roastPathObsidian: string;
@@ -60,8 +58,8 @@ export default class KaffelogicPlugin extends Plugin {
         window.setInterval(() => console.log("setInterval"), 5 * 60 * 1000));
   }
 
-  async importKLLog(klLog: KLLogManager) {
-    let templater = this.app.plugins.plugins["templater-obsidian"];
+  async importKLLog(klLog: KLLog) {
+    let templater = (this.app as any).plugins.plugins["templater-obsidian"];
     let tf =
         this.app.vault.getAbstractFileByPath(this.settings.roastTemplaterFile);
     let template_content = await this.app.vault.read(tf as TFile);
@@ -101,7 +99,7 @@ export default class KaffelogicPlugin extends Plugin {
   async saveSettings() { await this.saveData(this.settings); }
 }
 
-class KaffelogicImport extends FuzzySuggestModal<KLLog> {
+class KaffelogicImport extends FuzzySuggestModal<IKLLog> {
   plugin: KaffelogicPlugin;
 
   constructor(app: App, plugin: KaffelogicPlugin) {
@@ -109,21 +107,21 @@ class KaffelogicImport extends FuzzySuggestModal<KLLog> {
     this.plugin = plugin;
   }
 
-  getItems(): KLLog[] {
-    let paths: KLLog[] = [];
+  getItems(): IKLLog[] {
+    let paths: IKLLog[] = [];
     let results = walkSync(this.plugin.settings.roastPathKL, {
       globs : [ "**/*.klog" ],
     });
     for (var l of results) {
-      paths.push(new KLLogManager(
-          path.join(this.plugin.settings.roastPathKL, l), this.plugin));
+      paths.push(new KLLog(path.join(this.plugin.settings.roastPathKL, l),
+                           this.plugin));
     }
     return paths;
   }
 
-  getItemText(klLog: KLLog): string { return klLog.file; }
+  getItemText(klLog: IKLLog): string { return klLog.file; }
 
-  onChooseItem(klLog: KLLogManager, evt: MouseEvent|KeyboardEvent) {
+  onChooseItem(klLog: KLLog, evt: MouseEvent|KeyboardEvent) {
     this.plugin.importKLLog(klLog);
     new Notice(`Selected ${klLog.title}`);
   }

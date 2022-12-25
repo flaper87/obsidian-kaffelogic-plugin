@@ -1,8 +1,8 @@
 import "mocha";
 import { assert, expect } from "chai";
 import { before } from "mocha";
-import { KLLogManager } from "../src/kaffelogic";
-import { fileSystemHandler, resolvePathToData } from "./helpers";
+import { KLLog } from "../src/kaffelogic";
+import { fileSystemHandler, klLogManagerForData} from "./helpers";
 
 
 describe("TokenManager", () => {
@@ -13,12 +13,12 @@ describe("TokenManager", () => {
         });
 
         it('it returns the stored value', async () => {
-			let klManager = new KLLogManager(resolvePathToData("log.klog"), plugin);
+			let klManager = klLogManagerForData("log.klog");
 			let content = await klManager.parse();
 
 			// Test the length is the expected one and that 2 of the
 			// expected keys are there.
-			expect(Object.keys(content)).to.have.lengthOf(85);
+			expect(content.size).to.equal(89);
 			expect(content).to.have.not.all.keys("expect_fc", "roasting_level");
         });
     });

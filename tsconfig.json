@@ -1,20 +1,36 @@
 {
-    "extends": "@tsconfig/svelte/tsconfig.json",
-    "compilerOptions": {
-        "baseUrl": "src",
-        "target": "es6",
-        "allowJs": true,
-        "noImplicitAny": true,
-        "moduleResolution": "node",
-        "importHelpers": true,
-        "lib": [
-            "dom",
-            "es6",
-            "scripthost",
-            "es2019"
-        ],
-        "types": ["node", "svelte"]
-    },
-	"include": ["src/**/*.ts", "tests/**/*.ts", "docs/**/*"],
-    "exclude": ["node_modules/*"]
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true,
+    "compilerOptions": {}
+  },
+  "compilerOptions": {
+    "baseUrl": "src",
+    "target": "es6",
+    "allowJs": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "resolveJsonModule": true,
+    "lib": [
+      "dom",
+      "es6",
+      "scripthost",
+      "es2019"
+    ],
+    "types": [
+      "node",
+      "svelte"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "docs/**/*"
+  ],
+  "exclude": [
+    "node_modules/*",
+    ".vscode"
+  ]
 }
