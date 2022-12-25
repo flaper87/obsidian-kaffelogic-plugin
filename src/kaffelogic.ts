@@ -62,7 +62,7 @@ export class KLLogManager implements KLLog {
 
 			let [key, value] = l.split(':');
 
-			if (key == "first_crack" || key == "expect_fc") {
+			if (key == "first_crack" || key == "expect_fc" || key == "roast end" || key == "expect_colrchange") {
 				let fValue = Number.parseFloat(value);
 				let mins = Math.floor(fValue / 60);
 				let secs = Math.floor(fValue - (mins * 60))

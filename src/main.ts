@@ -84,7 +84,7 @@ export default class KaffelogicPlugin extends Plugin {
 
     let final_template =
         template_content.replace(/kl_log_data_table/, table)
-            .replace(/kl_log_attachment/, "![[" + kLogName + ".klog]]")
+            .replace(/kl_log_attachment/, "[[" + kLogName + ".klog]]")
             .replace(/kl_log_attachment_pdf/, "![[" + kLogName + ".pdf]]");
     let outDir =
         this.app.vault.getAbstractFileByPath(this.settings.roastPathObsidian);
