@@ -4,8 +4,9 @@
 
 The Kaffelogic plugin for Obsidian helps importing Kaffelogic Roasts (KLog Files) into Obsidian. What it currently does:
 
-![[note_example.png]]
-![[note_example_bottom.png]]
+![Screenshot of the top part of the note](./note_example.png)
+
+![Screenshot of the bottom part of the note](./note_example_bottom.png)
 
 - Alt + k -> Opens a new dialog to search for the log to import
 - On import, it reads the log, extracts all the stats and writes them into a note in the form of a Markdown table
