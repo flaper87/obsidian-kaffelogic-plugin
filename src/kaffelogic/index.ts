@@ -1,20 +1,26 @@
-import type {IFileSystemHandler} from "./fileSystem";
-import type KaffelogicPlugin from "./main";
+import type {IFileSystemHandler} from "../fileSystem";
+import type KaffelogicPlugin from "../main";
+import {
+  LOG_KEYS,
+  LOG_NUMBER_KEYS,
+  LOG_TIME_KEYS,
+  LOG_KEYS_GROUPS
+} from "./constants"
 import path from "path";
 
 export interface IKLLog {
   title: string;
   file: string;
-  data: Map<string, string>;
+  data: Map<string, string|number>;
 
   import_and_read(): Promise<string>;
-  parse(): Promise<Map<string, string>>;
+  parse(): Promise<Map<string, string|number>>;
 }
 
 export class KLLog implements IKLLog {
   title: string;
   file: string;
-  data: Map<string, string>;
+  data: Map<string, string|number>;
 
   plugin: KaffelogicPlugin;
 
@@ -28,7 +34,8 @@ export class KLLog implements IKLLog {
   get(): string { return this.file; }
 
   attachment_path(): string {
-	let attachmentDir = (this.plugin.app.vault as any).getConfig("attachmentFolderPath");
+    let attachmentDir =
+        (this.plugin.app.vault as any).getConfig("attachmentFolderPath");
     let fName = path.basename(this.file);
     // return
     // this.plugin.app.vault.getAbstractFileByPath(path.join(this.settings.roastPathObsidian,
@@ -53,7 +60,30 @@ export class KLLog implements IKLLog {
     return content;
   }
 
-  async parse(): Promise<Map<string, string>> {
+  async data_for_group(group: string): Promise<Map<string, string|number>> {
+    let data = await this.parse();
+    let group_data = new Map();
+
+    Object.entries(LOG_KEYS_GROUPS).forEach(([ key, value ]) => {
+      for (let kvar of LOG_KEYS_GROUPS[key]) {
+		let val = data.get(kvar);
+        // This likely means the variable has been disabled
+        // in the settings
+        if (val === undefined) {
+          continue;
+        }
+        group_data.set(kvar, val);
+      }
+    });
+
+    return group_data;
+  }
+
+  async parse(): Promise<Map<string, string|number>> {
+    if (this.data.size > 0) {
+      return this.data
+    }
+
     let content = await this.import_and_read();
 
     let plot = false;
@@ -73,17 +103,30 @@ export class KLLog implements IKLLog {
         l = l.substring(1);
       }
 
-      let [key, value] = l.split(':');
+      let key: string;
+      let value: string|number;
+      [key, value] = l.split(':');
 
-      if (key == "first_crack" || key == "expect_fc" || key == "roast end" ||
-          key == "expect_colrchange") {
-        let fValue = Number.parseFloat(value);
-        let mins = Math.floor(fValue / 60);
-        let secs = Math.floor(fValue - (mins * 60))
+      if (!this.plugin.settings.keysToImport.includes(key)) {
+        continue;
+      }
+
+      if (LOG_NUMBER_KEYS.includes(key)) {
+        let numValue = Number.parseFloat(value);
+        if (!Number.isNaN(numValue)) {
+          value = numValue.toFixed(3);
+        }
+      }
+
+      if (LOG_TIME_KEYS.includes(key)) {
+        let numValue = Number.parseFloat(value);
+        let mins = Math.floor((value as unknown as number) / 60);
+        let secs = Math.floor((value as unknown as number) - (mins * 60))
         value = mins + ":" + secs;
       }
       this.data.set(key, value);
     }
+
     return this.data;
   }
 }

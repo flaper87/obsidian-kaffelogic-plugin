@@ -1,7 +1,6 @@
 import fs from "fs";
+import {IKLLog, KLLog} from "kaffelogic";
 import {Align, getMarkdownTable, Row} from 'markdown-table-ts';
-import path from "path";
-import walkSync from "walk-sync";
 import {
   App,
   FuzzySuggestModal,
@@ -11,22 +10,17 @@ import {
   Setting,
   TFile
 } from "obsidian";
+import path from "path";
+import walkSync from "walk-sync";
 
-import {IKLLog, KLLog} from "kaffelogic";
-import {CommandHandler} from "./handlers/CommandHandler";
 import {FileSystemHandler} from "./fileSystem";
-
-interface KaffelogicPluginSettings {
-  roastPathObsidian: string;
-  roastPathKL: string;
-  roastTemplaterFile: string;
-}
-
-const DEFAULT_SETTINGS: KaffelogicPluginSettings = {
-  roastPathObsidian : "default",
-  roastPathKL : "default",
-  roastTemplaterFile : "",
-};
+import {CommandHandler} from "./handlers/CommandHandler";
+import {LOG_KEYS_GROUPS} from "./kaffelogic/constants";
+import {
+  DEFAULT_SETTINGS,
+  KaffelogicPluginSettings,
+  KaffelogicSettingTab
+} from "./settings";
 
 export default class KaffelogicPlugin extends Plugin {
   settings: KaffelogicPluginSettings;
@@ -66,12 +60,13 @@ export default class KaffelogicPlugin extends Plugin {
 
     let tContent = await klLog.parse();
     let kLogName = path.parse(klLog.file).name;
-    let dateParts =
-        ((tContent.get("roast_date") || tContent.get("profile_modified"))
-             .split(" ")[0])
-            .split("/");
+    let dateParts = (((tContent.get("roast_date") as string ||
+                       tContent.get("profile_modified")) as string)
+                         .split(" ")[0])
+                        .split("/");
     let filename = dateParts[2] + "-" + dateParts[1] + '-' + dateParts[0] +
                    ' | ' + kLogName;
+
     let table = getMarkdownTable({
       table : {
         head : [ 'Param', 'Value' ],
@@ -81,9 +76,32 @@ export default class KaffelogicPlugin extends Plugin {
     });
 
     let final_template =
-        template_content.replace(/kl_log_data_table/, table)
+        template_content
             .replace(/kl_log_attachment/, "[[" + kLogName + ".klog]]")
             .replace(/kl_log_attachment_pdf/, "![[" + kLogName + ".pdf]]");
+
+    tContent.forEach((value: string|number, key: string) => {
+      var regex = new RegExp("kl_log_var_" + key, "g");
+      final_template = final_template.replace(regex, value as string);
+    });
+
+    for (let key in LOG_KEYS_GROUPS) {
+      let groupData = await klLog.data_for_group(key);
+      console.log(groupData);
+      let groupTable = getMarkdownTable({
+        table : {
+          head : [ 'Param', 'Value' ],
+          body : Array.from(groupData.entries()).sort() as Row[],
+        },
+        alignment : [ Align.Left, Align.Left ],
+      });
+
+      var regex = new RegExp("kl_log_table_" + key, "g");
+      final_template = final_template.replace(regex, groupTable);
+    }
+
+    final_template = final_template.replace(/kl_log_data_table/, table);
+
     let outDir =
         this.app.vault.getAbstractFileByPath(this.settings.roastPathObsidian);
     await templater.templater.create_new_note_from_template(final_template,
@@ -134,66 +152,5 @@ class KaffelogicImport extends FuzzySuggestModal<IKLLog> {
   onClose() {
     const {contentEl} = this;
     contentEl.empty();
-  }
-}
-
-class KaffelogicSettingTab extends PluginSettingTab {
-  plugin: KaffelogicPlugin;
-
-  constructor(app: App, plugin: KaffelogicPlugin) {
-    super(app, plugin);
-    this.plugin = plugin;
-  }
-
-  display(): void {
-    const {containerEl} = this;
-
-    containerEl.empty();
-
-    containerEl.createEl("h2", {text : "Kaffelogic Settings"});
-
-    let roastPathObsidian =
-        new Setting(containerEl)
-            .setName("Roasts Path")
-            .setDesc("Your roast's path in your vault")
-            .addText(
-                (text) =>
-                    text.setPlaceholder("Enter path")
-                        .setValue(this.plugin.settings.roastPathObsidian)
-                        .onChange(async (value) => {
-                          if ((await this.app.vault.adapter.exists(value)) &&
-                              !value.endsWith(".md")) {
-                            roastPathObsidian.settingEl.removeClass(
-                                "invalid-path");
-                            if (value.slice(-1) === "/") {
-                              value = value.slice(0, -1);
-                            } // remove trailing '/'
-                            this.plugin.settings.roastPathObsidian = value;
-                            await this.plugin.saveSettings();
-                          } else {
-                            roastPathObsidian.setClass("invalid-path");
-                          }
-                        }));
-
-    new Setting(containerEl)
-        .setName("Kaffelogic Path")
-        .setDesc("Path to your Kaffelogic directory:")
-        .addText((text) => text.setPlaceholder("Enter path")
-                               .setValue(this.plugin.settings.roastPathKL)
-                               .onChange(async (value) => {
-                                 this.plugin.settings.roastPathKL = value;
-                                 await this.plugin.saveSettings();
-                               }));
-
-    new Setting(containerEl)
-        .setName("Kaffelogic Template")
-        .setDesc("Templater file for Kaffelogic logs:")
-        .addText((text) =>
-                     text.setPlaceholder("Enter path")
-                         .setValue(this.plugin.settings.roastTemplaterFile)
-                         .onChange(async (value) => {
-                           this.plugin.settings.roastTemplaterFile = value;
-                           await this.plugin.saveSettings();
-                         }));
   }
 }

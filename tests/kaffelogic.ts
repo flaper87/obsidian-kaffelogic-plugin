@@ -20,6 +20,7 @@ describe("TokenManager", () => {
 			// expected keys are there.
 			expect(content.size).to.equal(89);
 			expect(content).to.have.not.all.keys("expect_fc", "roasting_level");
+
         });
     });
 })
