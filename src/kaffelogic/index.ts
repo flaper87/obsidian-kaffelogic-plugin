@@ -65,8 +65,11 @@ export class KLLog implements IKLLog {
     let group_data = new Map();
 
     Object.entries(LOG_KEYS_GROUPS).forEach(([ key, value ]) => {
+      if (key !== group) {
+        return;
+      }
       for (let kvar of LOG_KEYS_GROUPS[key]) {
-		let val = data.get(kvar);
+        let val = data.get(kvar);
         // This likely means the variable has been disabled
         // in the settings
         if (val === undefined) {

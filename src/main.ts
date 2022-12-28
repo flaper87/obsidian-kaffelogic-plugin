@@ -87,7 +87,6 @@ export default class KaffelogicPlugin extends Plugin {
 
     for (let key in LOG_KEYS_GROUPS) {
       let groupData = await klLog.data_for_group(key);
-      console.log(groupData);
       let groupTable = getMarkdownTable({
         table : {
           head : [ 'Param', 'Value' ],
