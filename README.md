@@ -29,6 +29,11 @@ Once that's done, you can go into the `Community Plugins` section in obsidian
 to enable the Kaffelogic plugin. Finally, configure the various paths in the
 Kaffelogic settings and start importing your logs.
 
+
+# HotKey
+
+The default hotkey for the import command is: `Alt+k` and it can be changed through the hotkey's menu.
+
 # Settings
 
 The settings section allows for:
