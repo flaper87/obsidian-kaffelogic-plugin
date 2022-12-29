@@ -29,10 +29,22 @@ Once that's done, you can go into the `Community Plugins` section in obsidian
 to enable the Kaffelogic plugin. Finally, configure the various paths in the
 Kaffelogic settings and start importing your logs.
 
+# Settings
+
+The settings section allows for:
+
+- Setting your Kaffelogic files path
+- Setting your template file
+- Setting the directory in your vault where the imported roasts will be saved
+- Enable/disable variables to import
+- Group variables into specialized tables (see section below on how to use this specialized tables)
+
+![Screenshot of the settings tab](./kaffelogic_settings.png)
+
 # Documentation (will eventually move into proper docs):
 
 - `kl_log_var_{variable}` -> Will be replaced with the value of the variable chosen. The list of variables can be found [here](https://github.com/flaper87/obsidian-kaffelogic-plugin/blob/main/src/kaffelogic/constants.ts#L1) or in the settings tab
-- `kl_log_table_{group_name}` -> Will be replaced with a table for the desired group. Groups are currently [hard-coded here](https://github.com/flaper87/obsidian-kaffelogic-plugin/blob/main/src/kaffelogic/constants.ts#L182)
+- `kl_log_table_{group_name}` -> Will be replaced with a table for the desired group.
 - `kl_log_data_table` -> Will be replaced with the log table data
 - `kl_log_attachment` -> Adds a link to the imported log
 - `kl_log_attachment_pdf` -> Adds a link to the imported PDF (if present)

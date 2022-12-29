@@ -110,10 +110,15 @@ export default class KaffelogicPlugin extends Plugin {
   onunload() {};
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    let data = await this.loadData();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+	  //this.settings.groups = new Map(Object.entries(this.settings.groups));
   }
 
-  async saveSettings() { await this.saveData(this.settings); }
+  async saveSettings() {
+    console.log(this.settings);
+    await this.saveData(this.settings);
+  }
 }
 
 class KaffelogicImport extends FuzzySuggestModal<IKLLog> {

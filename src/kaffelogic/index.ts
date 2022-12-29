@@ -3,8 +3,7 @@ import type KaffelogicPlugin from "../main";
 import {
   LOG_KEYS,
   LOG_NUMBER_KEYS,
-  LOG_TIME_KEYS,
-  LOG_KEYS_GROUPS
+  LOG_TIME_KEYS
 } from "./constants"
 import path from "path";
 
@@ -64,11 +63,11 @@ export class KLLog implements IKLLog {
     let data = await this.parse();
     let group_data = new Map();
 
-    Object.entries(LOG_KEYS_GROUPS).forEach(([ key, value ]) => {
+    Object.entries(this.plugin.settings.groups).forEach(([ key, value ]) => {
       if (key !== group) {
         return;
       }
-      for (let kvar of LOG_KEYS_GROUPS[key]) {
+      for (let kvar of this.plugin.settings.groups[key]) {
         let val = data.get(kvar);
         // This likely means the variable has been disabled
         // in the settings
