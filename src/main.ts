@@ -65,7 +65,7 @@ export default class KaffelogicPlugin extends Plugin {
                          .split(" ")[0])
                         .split("/");
     let filename = dateParts[2] + "-" + dateParts[1] + '-' + dateParts[0] +
-                   ' | ' + kLogName;
+                   ' (' + kLogName + ')';
 
     let table = getMarkdownTable({
       table : {
