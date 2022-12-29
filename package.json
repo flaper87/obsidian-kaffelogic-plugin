@@ -8,7 +8,8 @@
   },
   "main": "src/main.js",
   "scripts": {
-    "build": "svelte-check && rollup --config rollup.config.js -w",
+    "watch": "svelte-check && rollup --config rollup.config.js -w",
+    "build": "svelte-check && rollup --config rollup.config.js",
     "test": "mocha -r ts-node/register tests/*.ts",
     "format": "prettier --write src/**/*",
     "lint": "prettier --check src/**/*"
