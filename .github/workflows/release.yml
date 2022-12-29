@@ -1,0 +1,27 @@
+name: Plugin release
+
+on:
+    push:
+        tags:
+            - "*"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+		permissions:
+		  contents: write
+        steps:
+            - uses: actions/checkout@v2
+            - uses: denolib/setup-deno@v2
+              with:
+                  deno-version: v1.x
+            - name: npm build
+              run: |
+                  yarn install
+                  yarn build
+            - name: Create Release
+              # https://github.com/ncipollo/release-action
+              uses: ncipollo/release-action@v1.7.3
+              with:
+                  artifacts: "dist/*"
+                  token: ${{ secrets.GITHUB_TOKEN }}
