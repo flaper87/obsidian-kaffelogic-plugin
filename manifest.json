@@ -7,5 +7,5 @@
 	"author": "Obsidian",
 	"authorUrl": "https://github.com/flaper87/obsidian-kaffelogic-plugin",
 	"fundingUrl": "",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }
