@@ -44,7 +44,6 @@
   },
   "dependencies": {
     "markdown-table-ts": "1.0.3",
-    "obsidian-utils": "0.10.0",
     "walk-sync": "^3.0.0"
   }
 }
