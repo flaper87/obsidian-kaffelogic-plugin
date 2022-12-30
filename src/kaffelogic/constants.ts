@@ -92,7 +92,6 @@ export const LOG_KEYS = [
 
 export const LOG_TIME_KEYS = [
   "first_crack",
-  "expect_fc",
   "roast end",
   "expect_colrchange",
   'zone1_time_start',
