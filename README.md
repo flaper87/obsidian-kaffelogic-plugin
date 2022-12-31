@@ -53,6 +53,7 @@ The settings section allows for:
 - `kl_log_data_table` -> Will be replaced with the log table data
 - `kl_log_attachment` -> Adds a link to the imported log
 - `kl_log_attachment_pdf` -> Adds a link to the imported PDF (if present)
+- `kl_log_chart` -> Adds chart data to use with `obsidian-chart`
 
 # Upcoming features / ideas
 

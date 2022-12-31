@@ -1,16 +1,13 @@
 import type {IFileSystemHandler} from "../fileSystem";
 import type KaffelogicPlugin from "../main";
-import {
-  LOG_KEYS,
-  LOG_NUMBER_KEYS,
-  LOG_TIME_KEYS
-} from "./constants"
+import {LOG_KEYS, LOG_NUMBER_KEYS, LOG_TIME_KEYS} from "./constants"
 import path from "path";
 
 export interface IKLLog {
   title: string;
   file: string;
   data: Map<string, string|number>;
+  histogramData: Map<string, Array<any>>;
 
   import_and_read(): Promise<string>;
   parse(): Promise<Map<string, string|number>>;
@@ -20,6 +17,7 @@ export class KLLog implements IKLLog {
   title: string;
   file: string;
   data: Map<string, string|number>;
+  histogramData: Map<string, Array<any>>;
 
   plugin: KaffelogicPlugin;
 
@@ -28,6 +26,7 @@ export class KLLog implements IKLLog {
     this.file = file;
     this.data = new Map();
     this.plugin = plugin;
+    this.histogramData = new Map();
   }
 
   get(): string { return this.file; }
@@ -41,6 +40,57 @@ export class KLLog implements IKLLog {
     // attachmentDir, fname));
     return path.join(this.plugin.settings.roastPathObsidian, attachmentDir,
                      fName);
+  }
+
+  async getHistogramData(): Promise<Map<string, Array<any>>> {
+    if (this.histogramData.size > 0) {
+      await this.parse();
+    }
+
+    return this.histogramData;
+  }
+
+  sliceHistogramData(header: string, offset: number): Array<any> {
+    let data = this.histogramData;
+    let rst = new Array();
+    for (var i = 0; i < data.get(header).length; i = i + offset) {
+      rst.push(data.get(header)[i]);
+    }
+    return rst;
+  }
+
+  private cleanHeaderName(header: string): string {
+    if (header.startsWith("#=")) {
+      return header.substring(2)
+    }
+    if (header.startsWith("#")) {
+      return header.substring(1)
+    }
+
+    return header;
+  }
+
+  parseHistogramLine(line: string): void {
+    let sLine = line.split("\t").filter(Boolean);
+    if (sLine[0] == "offset") {
+      this.histogramData.set("offset", sLine.slice(1));
+      return;
+    }
+    if (sLine[0] == "time") {
+      this.histogramData.set("headers", sLine.map(this.cleanHeaderName));
+      return;
+    }
+
+    for (var idx in (this.histogramData.get("headers") as Array<string>)) {
+      let header = this.cleanHeaderName(this.histogramData.get("headers")[idx]);
+
+      if (!this.histogramData.has(header)) {
+        this.histogramData.set(header, [ sLine[idx] ]);
+      } else {
+        this.histogramData.set(
+            header, [...this.histogramData.get(header), sLine[idx] ]);
+      }
+    }
   }
 
   async import_and_read(): Promise<string> {
@@ -89,7 +139,7 @@ export class KLLog implements IKLLog {
     let content = await this.import_and_read();
 
     let plot = false;
-    for (var l of content.split(/\r?\n/)) {
+    for (const l of content.split(/\r?\n/)) {
       // This is a new, empty, line that separates
       // the profile data from the plot data
       if (!l) {
@@ -98,16 +148,13 @@ export class KLLog implements IKLLog {
       }
 
       if (plot && !l.startsWith("!")) {
+        this.parseHistogramLine(l);
         continue;
-      }
-
-      if (l.startsWith("!")) {
-        l = l.substring(1);
       }
 
       let key: string;
       let value: string|number;
-      [key, value] = l.split(':');
+      [key, value] = (l.startsWith("!") ? l.substring(1) : l).split(':');
 
       if (!this.plugin.settings.keysToImport.includes(key)) {
         continue;

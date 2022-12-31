@@ -90,6 +90,26 @@ export default class KaffelogicPlugin extends Plugin {
       final_template = final_template.replace(regex, value as string);
     });
 
+    let histogramData = await klLog.getHistogramData();
+    let chart = `type: line
+labels: [${klLog.sliceHistogramData('time', 30)}]
+series:
+${
+        Array.from(histogramData.get("headers"))
+            .filter((header) => header !== "time")
+            .map((header) => `  - title: ${header}\n    data: [${
+                     klLog.sliceHistogramData(header, 30)}]`)
+            .join("\n")}
+tension: ${30 / 100}
+labelColors: true
+fill: false
+beginAtZero: false
+legendPosition: bottom`;
+
+    chart = "```chart\n" + chart + "\n```";
+
+    final_template = final_template.replace(/kl_log_chart/, chart);
+
     for (let key in LOG_KEYS_GROUPS) {
       let groupData = await klLog.data_for_group(key);
       let groupTable = getMarkdownTable({
@@ -117,7 +137,6 @@ export default class KaffelogicPlugin extends Plugin {
   async loadSettings() {
     let data = await this.loadData();
     this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
-	  //this.settings.groups = new Map(Object.entries(this.settings.groups));
   }
 
   async saveSettings() {

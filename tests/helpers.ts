@@ -8,13 +8,14 @@ import {IKLLog, KLLog} from "../src/kaffelogic"
 
 export function klLogManagerForData(log: string): IKLLog {
   let path = resolvePathToData(log);
-	const data: Map<string, any> = new Map();
+  const data: Map<string, any> = new Map();
+  const histogramData: Map<string, Array<any>> = new Map();
 
   return {
-	data:  data,
-    title: log, file: path, import_and_read: async(): Promise<string> => {
-      return await fsPromise.readFile(path, 'utf-8');
-    }, parse: KLLog.prototype.parse,
+    histogramData: histogramData, data: data, title: log, file: path,
+        import_and_read: async(): Promise<string> => {
+          return await fsPromise.readFile(path, 'utf-8');
+        }, parse: KLLog.prototype.parse,
   }
 }
 
