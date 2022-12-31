@@ -54,6 +54,11 @@ export default class KaffelogicPlugin extends Plugin {
 
   async importKLLog(klLog: KLLog) {
     let templater = (this.app as any).plugins.plugins["templater-obsidian"];
+
+	if (templater === undefined) {
+		new Notice("Templater plugin is not enabled!");
+		return;
+	}
     let tf =
         this.app.vault.getAbstractFileByPath(this.settings.roastTemplaterFile);
     let template_content = await this.app.vault.read(tf as TFile);
@@ -145,7 +150,6 @@ class KaffelogicImport extends FuzzySuggestModal<IKLLog> {
 
   onChooseItem(klLog: KLLog, evt: MouseEvent|KeyboardEvent) {
     this.plugin.importKLLog(klLog);
-    new Notice(`Selected ${klLog.title}`);
   }
 
   onOpen() {
