@@ -1,6 +1,6 @@
 {
   "name": "obsidian-kaffelogic-plugin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Plugin to manage your roasts, notes, logs, schedules. All inside Obsidian",
   "repository": {
     "type": "git",
