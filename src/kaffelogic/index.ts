@@ -70,6 +70,13 @@ export class KLLog implements IKLLog {
     return header;
   }
 
+  secondsToMinSec(value: string|number): string {
+    let numValue = Number.parseFloat(value as string);
+    let mins = Math.floor((value as unknown as number) / 60);
+    let secs = Math.floor((value as unknown as number) - (mins * 60))
+    return mins + ":" + secs;
+  }
+
   parseHistogramLine(line: string): void {
     let sLine = line.split("\t").filter(Boolean);
     if (sLine[0] == "offset") {
@@ -84,11 +91,16 @@ export class KLLog implements IKLLog {
     for (var idx in (this.histogramData.get("headers") as Array<string>)) {
       let header = this.cleanHeaderName(this.histogramData.get("headers")[idx]);
 
+      let value = sLine[idx];
+      if (header === "time") {
+        value = this.secondsToMinSec(value);
+      }
+
       if (!this.histogramData.has(header)) {
-        this.histogramData.set(header, [ sLine[idx] ]);
+        this.histogramData.set(header, [ value ]);
       } else {
-        this.histogramData.set(
-            header, [...this.histogramData.get(header), sLine[idx] ]);
+        this.histogramData.set(header,
+                               [...this.histogramData.get(header), value ]);
       }
     }
   }
@@ -168,10 +180,7 @@ export class KLLog implements IKLLog {
       }
 
       if (LOG_TIME_KEYS.includes(key)) {
-        let numValue = Number.parseFloat(value);
-        let mins = Math.floor((value as unknown as number) / 60);
-        let secs = Math.floor((value as unknown as number) - (mins * 60))
-        value = mins + ":" + secs;
+        value = this.secondsToMinSec(value);
       }
       this.data.set(key, value);
     }

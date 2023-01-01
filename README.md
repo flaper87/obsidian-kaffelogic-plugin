@@ -6,6 +6,8 @@ The Kaffelogic plugin for Obsidian helps importing Kaffelogic Roasts (KLog Files
 
 ![Screenshot of the top part of the note](./note_example.png)
 
+![Screenshot of the top part of the note with chart](./note_example_chart.png)
+
 ![Screenshot of the bottom part of the note](./note_example_bottom.png)
 
 - Alt + k -> Opens a new dialog to search for the log to import
