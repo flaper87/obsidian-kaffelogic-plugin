@@ -165,8 +165,9 @@ export class KLLog implements IKLLog {
       }
 
       let key: string;
-      let value: string|number;
-      [key, value] = (l.startsWith("!") ? l.substring(1) : l).split(':');
+      let value: string|number = l.startsWith("!") ? l.substring(1) : l;
+      key = value.slice(0, value.indexOf(":"));
+      value = value.slice(value.indexOf(":") + 1);
 
       if (!this.plugin.settings.keysToImport.includes(key)) {
         continue;
